@@ -9,7 +9,7 @@ I needed only JWT token authorization, so only this is supported for now.
 
 To install it, just add 
 
-    -e git://github.com/whatsahoy/smooch-python.git@master#egg=smooch
+    -e git://github.com/androidsx/smooch-python.git@master#egg=smooch
     
 to your `requirements.txt` file. 
 
