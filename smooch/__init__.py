@@ -66,30 +66,29 @@ class Smooch:
         else:
             raise Smooch.APIError(response)
 
-    def post_message(self, user_id, message, sent_by_maker=False):
+    def post_message(self, user_id, message='', sent_by_maker=False, media_url=None, media_type=None):
+        """
+        Post a message to the app user.
+        Args:
+            user_id (str): A unique identifier for the app user.
+            message (str): The message content. text becomes optional if media_url and media_type are both specified.
+            media_url (str, optional): The image URL used in an image message. If a mediaUrl is specified, the media_type must also be specified.
+            media_type (str, optional): If a media_url was specified, the media type is defined here, for example image/jpeg
+        """
+
         role = "appUser"
         if sent_by_maker:
             role = "appMaker"
 
         data = {"text": message, "role": role}
+
+        if media_url is not None and media_type is not None:
+            data.update({
+                'mediaUrl': media_url,
+                'mediaType': media_type,
+            })
+
         return self.ask('appusers/{0}/conversation/messages'.format(user_id), data, 'post')
-
-    def post_media(self, user_id, file_path, sent_by_maker=False):
-        role = "appUser"
-        if sent_by_maker:
-            role = "appMaker"
-
-        data = {"role": role}
-
-        mime = MimeTypes()
-        mime_type, _ = mime.guess_type(file_path)
-
-        file_name = os.path.basename(file_path)
-        files = {'source': (file_name, open(file_path, 'rb'), mime_type)}
-
-        url = 'appusers/{0}/conversation/images'.format(user_id)
-
-        return self.ask(url, data, 'post', files)
 
     def get_user(self, user_id):
         """
@@ -103,7 +102,7 @@ class Smooch:
         """
         Update an app user’s basic profile information
         Args:
-            user_id (int): A unique identifier for the app user.
+            user_id (str): A unique identifier for the app user.
             data (dict, optional): Can contain `givenName`, `surname`, `email`, `signUpAt`, `properties` values
         """
         if data is None:
@@ -131,7 +130,7 @@ class Smooch:
         """
         Pre-Create App User
         Args:
-            user_id (int): A unique identifier for the app user.
+            user_id (str): A unique identifier for the app user.
             data (dict, optional): Can contain `givenName`, `surname`, `email`, `signUpAt`, `properties` values
         """
         if data is None:
