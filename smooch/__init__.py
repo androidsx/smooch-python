@@ -4,16 +4,14 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import jwt
 import json
-import os
 import requests
-
-from mimetypes import MimeTypes
 
 log = logging.getLogger(__name__)
 
 
 class Smooch:
     ALGORITHM = 'HS256'
+    API_URL = 'https://api.smooch.io/v1'
 
     class APIError(Exception):
         def __init__(self, response):
@@ -36,7 +34,7 @@ class Smooch:
         return self.jwt_for_user(self.key_id, self.secret, user_id)
 
     def ask(self, endpoint, data, method='get', files=None):
-        url = "https://api.smooch.io/v1/{0}".format(endpoint)
+        url = "{0}/{1}".format(self.API_URL, endpoint)
 
         if method == 'get':
             caller_func = requests.get
@@ -89,6 +87,22 @@ class Smooch:
             })
 
         return self.ask('appusers/{0}/conversation/messages'.format(user_id), data, 'post')
+
+    def get_user_history(self, user_id):
+        """
+        Get the specified app user’s conversation history, if it exists.
+        Args:
+            user_id (str): A unique identifier for the app user.
+        """
+        return self.ask('appusers/{0}/conversation'.format(user_id), {}, 'get')
+
+    def reset_unread_count(self, user_id):
+        """
+        Reset the unread count of the conversation to 0.
+        Args:
+            user_id (str): A unique identifier for the app user.
+        """
+        return self.ask('appusers/{0}/conversation/read'.format(user_id), {}, 'post')
 
     def get_user(self, user_id):
         """
